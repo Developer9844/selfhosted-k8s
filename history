@@ -95,5 +95,17 @@ EOF
             Root = ''
             ShimCgroup = ''
             SystemdCgroup = true
+            
 
 https://mrmaheshrajput.medium.com/deploy-kubernetes-cluster-on-aws-ec2-instances-f3eeca9e95f1
+
+sed -i "/ShimCgroup = ''/a \            SystemdCgroup = true" history 
+
+kubectl label node ip-172-31-2-53 node-role.kubernetes.io/worker=worker
+
+kubectl create deployment nginx --image=nginx
+
+kubectl expose deployment nginx --port=80 --type=NodePort
+
+
+curl 3.239.224.235:NodePort

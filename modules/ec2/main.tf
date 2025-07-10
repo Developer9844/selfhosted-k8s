@@ -2,13 +2,6 @@ data "aws_vpc" "default" {
   default = true
 }
 
-output "default_vpc_id" {
-  value = data.aws_vpc.default.id
-}
-output "default_vpc_cidr" {
-  value = data.aws_vpc.default.cidr_block
-}
-
 resource "aws_instance" "instance_1" {
   ami           = "ami-0e001c9271cf7f3b9"
   instance_type = "t3.medium"
@@ -20,11 +13,15 @@ resource "aws_instance" "instance_1" {
     volume_size = 30
     volume_type = "gp3"
   }
+  user_data = file("${path.module}/../../scripts/containerd.sh")
   tags = {
     Name = "CP-Node"
   }
 }
 
+resource "aws_eip" "elastic_ip" {
+  instance = aws_instance.instance_1[0].id
+}
 
 # security group
 resource "aws_security_group" "securityGroup" {
@@ -57,10 +54,13 @@ resource "aws_instance" "instance_2" {
     volume_size = 30
     volume_type = "gp3"
   }
+  user_data = file("${path.module}/../../scripts/containerd.sh")
+
   tags = {
     Name = "Worker-Node"
   }
 }
+
 
 
 # security group
