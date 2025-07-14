@@ -94,3 +94,9 @@ sudo apt-get install -y kubelet kubeadm kubectl
 echo "Fixate version to prevent upgrades"
 
 sudo apt-mark hold kubelet kubeadm kubectl
+
+
+sudo kubeadm join 3.214.75.233:6443 --token d3mpwv.yxgi54ypw13570zp       \
+  --discovery-token-ca-cert-hash sha256:97cec8d3a7fab8c85c1a777da8eab82f361cb8fe0aea2f26bc0f03c6bd62cb9e
+
+sudo systemctl restart kubelet.service
