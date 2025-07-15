@@ -66,6 +66,7 @@ resource "aws_autoscaling_group" "AutoScalingGroup" {
     id      = aws_launch_template.LaunchTemplate.id
     version = "$Latest"
   }
+  
 
   tag {
     key                 = "Name"
@@ -74,3 +75,4 @@ resource "aws_autoscaling_group" "AutoScalingGroup" {
   }
 }
 
+#https://www.apptio.com/topics/kubernetes/autoscaling/cluster/
