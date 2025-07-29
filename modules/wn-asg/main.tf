@@ -52,11 +52,12 @@ data "aws_subnets" "default" {
   }
   filter {
     name   = "availability-zone"
-    values = ["us-east-1a", "us-east-1b", "us-east-1c"] 
+    values = ["us-east-1a", "us-east-1b", "us-east-1c"]
   }
 }
 
 resource "aws_autoscaling_group" "AutoScalingGroup" {
+  name = "cluster-autoscale"
   desired_capacity    = 2
   max_size            = 2
   min_size            = 1
@@ -66,11 +67,21 @@ resource "aws_autoscaling_group" "AutoScalingGroup" {
     id      = aws_launch_template.LaunchTemplate.id
     version = "$Latest"
   }
-  
+
 
   tag {
     key                 = "Name"
     value               = "Worker-node"
+    propagate_at_launch = true
+  }
+  tag {
+    key                 = "k8s.io/cluster-autoscaler/${var.clusterName}"
+    value               = "owned"
+    propagate_at_launch = true
+  }
+  tag {
+    key                 = "k8s.io/cluster-autoscaler/enabled"
+    value               = "true"
     propagate_at_launch = true
   }
 }

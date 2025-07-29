@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -ex
 
 echo "Creating containerd configuration file with list of necessary modules that need to be loaded with containerd"
 
@@ -95,16 +95,24 @@ echo "Fixate version to prevent upgrades"
 
 sudo apt-mark hold kubelet kubeadm kubectl
 
+sleep 300s
 PUBLIC_IP=$(curl ifconfig.me)
 echo $PUBLIC_IP
-sudo kubeadm init --control-plane-endpoint=$PUBLIC_IP
+sudo kubeadm init --control-plane-endpoint=$PUBLIC_IP --pod-network-cidr=10.244.0.0/16 >> /home/ubuntu/init.log 2>&1
 
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
+if [ $? -ne 0 ]; then
+    echo "Kubeadm init failed. Please check init.log"
+    exit 1
+fi
+
+
+mkdir -p /home/ubuntu/.kube
+sudo cp -i /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
+sudo chown ubuntu:ubuntu -R /home/ubuntu/.kube/
 
 kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
 
 sleep 5s
 
 echo "Successfully Install Kubeadm - Control Plane"
+sudo kubeadm token create --print-join-command >> /home/ubuntu/token.log 2>&1

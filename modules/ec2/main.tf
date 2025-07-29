@@ -2,18 +2,65 @@ data "aws_vpc" "default" {
   default = true
 }
 
+
+resource "aws_iam_role" "control_plane_role" {
+  name = "control-plane-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "main" {
+  name = "policy"
+  role = aws_iam_role.control_plane_role.name
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeAutoScalingInstances",
+          "autoscaling:SetDesiredCapacity",
+          "autoscaling:TerminateInstanceInAutoScalingGroup",
+          "ec2:DescribeLaunchTemplateVersions"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_instance_profile" "main" {
+  name = "instance-profile"
+  role = aws_iam_role.control_plane_role.name
+}
+
+
+
 resource "aws_instance" "instance_1" {
-  ami           = "ami-0e001c9271cf7f3b9"
-  instance_type = "t3.medium"
-  key_name      = "new-server"
-  count         = 1
+  ami                    = "ami-0e001c9271cf7f3b9"
+  instance_type          = "t3.medium"
+  key_name               = "new-server"
+  count                  = 1
   vpc_security_group_ids = [aws_security_group.securityGroup.id]
-  depends_on = [ aws_security_group.securityGroup ]
+  depends_on             = [aws_security_group.securityGroup]
   root_block_device {
     volume_size = 30
     volume_type = "gp3"
   }
-  user_data = file("${path.module}/../../scripts/master_node.sh")
+  user_data            = file("${path.module}/../../scripts/master_node.sh")
+  iam_instance_profile = aws_iam_instance_profile.main.name
   tags = {
     Name = "CP-Node"
   }
@@ -28,7 +75,7 @@ resource "aws_security_group" "securityGroup" {
   vpc_id = data.aws_vpc.default.id
 
   tags = {
-    Name                     = "CP-security-group"
+    Name = "CP-security-group"
   }
   dynamic "ingress" {
     for_each = var.ingress_rules
@@ -40,7 +87,7 @@ resource "aws_security_group" "securityGroup" {
       description = ingress.value.description
     }
   }
-   egress {
+  egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"

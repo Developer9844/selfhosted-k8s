@@ -12,7 +12,7 @@ output "default_vpc_cidr" {
   value = data.aws_vpc.default.cidr_block
 }
 output "elastic_ip" {
-  value = aws_eip.elastic_ip.address
+  value = aws_eip.elastic_ip.public_ip
 }
 
 

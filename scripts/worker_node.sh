@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -ex
 
 echo "Creating containerd configuration file with list of necessary modules that need to be loaded with containerd"
 
@@ -96,7 +96,7 @@ echo "Fixate version to prevent upgrades"
 sudo apt-mark hold kubelet kubeadm kubectl
 
 
-sudo kubeadm join 3.214.75.233:6443 --token d3mpwv.yxgi54ypw13570zp       \
-  --discovery-token-ca-cert-hash sha256:97cec8d3a7fab8c85c1a777da8eab82f361cb8fe0aea2f26bc0f03c6bd62cb9e
+sudo kubeadm join 174.129.13.189:6443 --token 3xxseg.enriglmtik60m5gh \
+        --discovery-token-ca-cert-hash sha256:3a4da166935097a2667a27bd7e3a2c48e59fd9ad10dce40b815d4bb67b270f28 
 
 sudo systemctl restart kubelet.service

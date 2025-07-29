@@ -7,4 +7,5 @@ module "ec2" {
 module "worker_nodes" {
   source               = "./modules/wn-asg"
   ingress_rules_worker = var.ingress_rules_worker
+  clusterName          = "kubernetes"
 }
